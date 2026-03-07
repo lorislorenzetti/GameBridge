@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="GameAudioMixer.Views.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="GameBridge">
+
+    <Grid RequestedTheme="Dark" Background="#0A0E1A">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Invisible focus sink: must be 1x1 (not 0x0) so WinUI can actually focus it -->
+        <Button x:Name="FocusSink" Width="1" Height="1" Padding="0"
+                Background="Transparent" BorderThickness="0" Opacity="0"
+                IsTabStop="True" UseSystemFocusVisuals="False"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Margin="0,42,0,0"/>
+
+        <!-- ═══ CUSTOM TITLE BAR ═══ -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="42" Background="#080C16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="14"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="138"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Cyan accent line at bottom of title bar -->
+            <Border Height="1" Background="#1500CFFF" VerticalAlignment="Bottom"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <!-- Neon accent dot -->
+                <Border Width="6" Height="6" CornerRadius="3" Background="#7000CFFF" VerticalAlignment="Center"/>
+                <TextBlock x:Name="TitleText" Text="GameBridge" FontSize="11" FontWeight="Bold"
+                           Foreground="#CC00CFFF" CharacterSpacing="80"
+                           VerticalAlignment="Center" IsHitTestVisible="False"
+                           FontFamily="Cascadia Code, Consolas"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="0"
+                        VerticalAlignment="Center">
+                <Border x:Name="DuckBadge" Background="#1500CFFF" CornerRadius="3" Padding="7,2" Visibility="Collapsed"
+                        VerticalAlignment="Center" Margin="0,0,6,0">
+                    <TextBlock x:Name="DuckingIndicator" Text="DUCK" FontSize="8" FontWeight="Bold"
+                               Foreground="#9000CFFF" CharacterSpacing="80" FontFamily="Cascadia Code, Consolas"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+
+        <!-- ═══ MAIN VIEW ═══ -->
+        <ScrollViewer x:Name="MainContent" Grid.Row="1" Padding="12,8,12,12">
+            <StackPanel Spacing="7">
+
+                <!-- Preset section (keeps code-behind refs) -->
+                <StackPanel x:Name="PresetSection" Spacing="6">
+                    <StackPanel x:Name="PresetButtonsPanel" Orientation="Horizontal" Spacing="6"/>
+                </StackPanel>
+
+                <!-- ═══ SOURCE ROW (GAME + CHAT) ═══ -->
+                <Grid ColumnSpacing="6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- GAME source -->
+                    <Border Grid.Column="0" Style="{StaticResource GlassCard}" Padding="12,9"
+                            BorderBrush="#2800CFFF">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="5">
+                                <Border Width="5" Height="5" CornerRadius="3" Background="#6000CFFF"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Text="GAME" FontSize="10" FontWeight="Bold" Foreground="#DD00CFFF"
+                                           CharacterSpacing="150" VerticalAlignment="Center"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+                            <Button x:Name="GameOverrideBtn" Grid.Row="1" Margin="0,5,0,0"
+                                    Click="OnGameOverrideClick" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Height="28" CornerRadius="5" Padding="8,0,6,0"
+                                    Background="#1000CFFF" BorderThickness="1" BorderBrush="#2500CFFF">
+                                <Button.Flyout>
+                                    <MenuFlyout x:Name="GameFlyout" Placement="Bottom"/>
+                                </Button.Flyout>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="GameDetectedLabel" Text="Waiting..." FontSize="12"
+                                               Foreground="#CC00CFFF" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                                    <FontIcon Grid.Column="1" Glyph="&#xE70D;" FontSize="9"
+                                              Foreground="#5500CFFF" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </Grid>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- CHAT source -->
+                    <Border Grid.Column="1" Style="{StaticResource GlassCard}" Padding="12,9"
+                            BorderBrush="#28B44FFF">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="5">
+                                <Border Width="5" Height="5" CornerRadius="3" Background="#60B44FFF"
+                                        VerticalAlignment="Center"/>
+                                <TextBlock Text="CHAT" FontSize="10" FontWeight="Bold" Foreground="#DDB44FFF"
+                                           CharacterSpacing="150" VerticalAlignment="Center"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+                            <Button x:Name="ChatOverrideBtn" Grid.Row="1" Margin="0,5,0,0"
+                                    Click="OnChatOverrideClick" HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Stretch"
+                                    Height="28" CornerRadius="5" Padding="8,0,6,0"
+                                    Background="#10B44FFF" BorderThickness="1" BorderBrush="#25B44FFF">
+                                <Button.Flyout>
+                                    <MenuFlyout x:Name="ChatFlyout" Placement="Bottom"/>
+                                </Button.Flyout>
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="ChatDetectedLabel" Text="Waiting..." FontSize="12"
+                                               Foreground="#CCB44FFF" TextTrimming="CharacterEllipsis"
+                                               VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                                    <FontIcon Grid.Column="1" Glyph="&#xE70D;" FontSize="9"
+                                              Foreground="#55B44FFF" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                                </Grid>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- ═══ MIX CARD (hero) ═══ -->
+                <Border Style="{StaticResource GlassCard}" Padding="16,14">
+                    <StackPanel Spacing="11">
+
+                        <!-- VU meters – neon cyan left, violet right -->
+                        <Grid Height="6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid x:Name="GameMeterTrack" Grid.Column="0" Height="6" CornerRadius="3">
+                                <Border Background="#1000CFFF" CornerRadius="3"/>
+                                <Border x:Name="GameMeterFill" Background="#9000CFFF" CornerRadius="3"
+                                        HorizontalAlignment="Right" Width="0"/>
+                            </Grid>
+                            <Grid x:Name="ChatMeterTrack" Grid.Column="2" Height="6" CornerRadius="3">
+                                <Border Background="#10B44FFF" CornerRadius="3"/>
+                                <Border x:Name="ChatMeterFill" Background="#90B44FFF" CornerRadius="3"
+                                        HorizontalAlignment="Left" Width="0"/>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Volume numbers row – monospace neon -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2"
+                                        VerticalAlignment="Center">
+                                <TextBlock x:Name="GameVolText" Text="100" FontSize="34" FontWeight="Bold"
+                                           Foreground="#CC00CFFF" FontFamily="Cascadia Code, Consolas"/>
+                                <TextBlock Text="%" FontSize="14" Foreground="#AA00CFFF"
+                                           VerticalAlignment="Bottom" Margin="1,0,0,6"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+
+                            <TextBlock Grid.Column="1" Text="MIX" FontSize="10" FontWeight="Bold"
+                                       Foreground="#AAFFFFFF" CharacterSpacing="300"
+                                       VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock x:Name="ChatVolText" Text="100" FontSize="34" FontWeight="Bold"
+                                           Foreground="#CCB44FFF" FontFamily="Cascadia Code, Consolas"/>
+                                <TextBlock Text="%" FontSize="14" Foreground="#AAB44FFF"
+                                           VerticalAlignment="Bottom" Margin="1,0,0,6"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Balance slider track -->
+                        <Grid x:Name="BalanceGrid" Height="26" DoubleTapped="OnMixSliderDoubleTapped">
+                            <Grid Height="5" CornerRadius="3" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="GameTrackCol" Width="*"/>
+                                    <ColumnDefinition x:Name="ChatTrackCol" Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#1E00CFFF" CornerRadius="3,0,0,3"/>
+                                <Border Grid.Column="1" Background="#1EB44FFF" CornerRadius="0,2.5,2.5,0"/>
+                            </Grid>
+                            <!-- Center tick -->
+                            <Border Width="1" Height="11" CornerRadius="1"
+                                    Background="#22FFFFFF" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            <Slider x:Name="BalanceSlider" Minimum="0" Maximum="200" Value="100"
+                                    StepFrequency="1" ValueChanged="OnBalanceChanged" Opacity="0"
+                                    IsThumbToolTipEnabled="False"
+                                    VerticalAlignment="Center" Margin="-4,0"/>
+                            <Border x:Name="SliderThumb"
+                                    Width="3" Height="20" CornerRadius="2"
+                                    Background="#D0FFFFFF" HorizontalAlignment="Left"
+                                    VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        </Grid>
+
+                        <!-- Mute buttons -->
+                        <Grid ColumnSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" x:Name="GameMuteButton" Click="OnGameMuteClick"
+                                    HorizontalAlignment="Stretch" Height="30" CornerRadius="4"
+                                    Background="#0C00CFFF" BorderThickness="1" BorderBrush="#2200CFFF">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon x:Name="GameMuteIcon" Glyph="&#xE767;" FontSize="11"
+                                              Foreground="#CC00CFFF"/>
+                                    <TextBlock x:Name="GameMuteText" Text="MUTE GAME" FontSize="11"
+                                               FontWeight="Bold" Foreground="#DD00CFFF" CharacterSpacing="50"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Grid.Column="1" x:Name="ChatMuteButton" Click="OnChatMuteClick"
+                                    HorizontalAlignment="Stretch" Height="30" CornerRadius="4"
+                                    Background="#0CB44FFF" BorderThickness="1" BorderBrush="#22B44FFF">
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <FontIcon x:Name="ChatMuteIcon" Glyph="&#xE767;" FontSize="11"
+                                              Foreground="#CCB44FFF"/>
+                                    <TextBlock x:Name="ChatMuteText" Text="MUTE CHAT" FontSize="11"
+                                               FontWeight="Bold" Foreground="#DDB44FFF" CharacterSpacing="50"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <!-- Separator line -->
+                        <Border Height="1" Background="#0EFFFFFF" Margin="-16,0"/>
+
+                        <!-- Master volume row -->
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="36"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="VOL" FontSize="10" FontWeight="Bold" Foreground="#AAFFFFFF"
+                                       CharacterSpacing="150" VerticalAlignment="Center"
+                                       FontFamily="Cascadia Code, Consolas"/>
+                            <Grid Grid.Column="1" Height="26" VerticalAlignment="Center">
+                                <Grid Height="4" CornerRadius="2" VerticalAlignment="Center">
+                                    <Border Background="#15FFFFFF" CornerRadius="2"/>
+                                    <Border x:Name="MasterFillTrack" Background="#35FFFFFF"
+                                            CornerRadius="2" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Slider x:Name="MasterVolumeSlider" Minimum="0" Maximum="100"
+                                        StepFrequency="1" ValueChanged="OnMasterVolumeChanged"
+                                        Opacity="0" IsThumbToolTipEnabled="False"
+                                        VerticalAlignment="Center" Margin="-4,0"/>
+                                <Border x:Name="MasterThumb" Width="3" Height="18" CornerRadius="2"
+                                        Background="#D0FFFFFF" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                            <TextBlock Grid.Column="2" x:Name="MasterVolText" Text="–"
+                                       FontSize="11" Foreground="#CCFFFFFF" VerticalAlignment="Center"
+                                       HorizontalAlignment="Right" FontFamily="Cascadia Code, Consolas"/>
+                        </Grid>
+
+                        <!-- Auto-ducking row -->
+                        <Grid ColumnSpacing="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="DuckToggleBtn" Click="OnDuckToggleClick"
+                                    HorizontalAlignment="Stretch" Height="32" CornerRadius="4"
+                                    Background="#0AFFFFFF" BorderThickness="1" BorderBrush="#15FFFFFF">
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <FontIcon x:Name="DuckToggleIcon" Glyph="&#xE994;" FontSize="12"
+                                              Foreground="#AAFFFFFF"/>
+                                    <TextBlock Grid.Column="1" Text="AUTO-DUCKING" FontSize="11" FontWeight="Bold"
+                                               Foreground="#EEFFFFFF" CharacterSpacing="80"
+                                               Margin="8,0,0,0" VerticalAlignment="Center"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                    <Border x:Name="DuckStatusBadge" Grid.Column="2"
+                                            CornerRadius="3" Padding="8,2" VerticalAlignment="Center">
+                                        <TextBlock x:Name="DuckStatusText" Text="OFF" FontSize="10"
+                                                   FontWeight="Bold" Foreground="#CCFFFFFF"
+                                                   CharacterSpacing="80" FontFamily="Cascadia Code, Consolas"/>
+                                    </Border>
+                                </Grid>
+                            </Button>
+
+                            <!-- Discord screen-share warning icon -->
+                            <Border x:Name="DiscordScreenShareBanner" Grid.Column="1"
+                                    Visibility="Collapsed" Width="32" Height="32" CornerRadius="4"
+                                    Background="#15FFAA00" BorderThickness="1" BorderBrush="#30FFAA00">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip MaxWidth="240">
+                                        <TextBlock Text="Discord is selected as chat. If you're screen sharing, auto-ducking may trigger on game audio — consider disabling it while sharing."
+                                                   TextWrapping="Wrap" FontSize="11"/>
+                                    </ToolTip>
+                                </ToolTipService.ToolTip>
+                                <FontIcon Glyph="&#xE7BA;" FontSize="13" Foreground="#FFCC66"/>
+                            </Border>
+
+                            <Button Grid.Column="2" Click="OnDuckSettingsClick"
+                                    Width="32" Height="32" CornerRadius="4" Padding="0"
+                                    Background="#0AFFFFFF" BorderThickness="1" BorderBrush="#15FFFFFF"
+                                    ToolTipService.ToolTip="Ducking settings">
+                                <FontIcon Glyph="&#xE713;" FontSize="13" Foreground="#AAFFFFFF"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+
+                <!-- ═══ MIC ═══ -->
+                <Border x:Name="MicCard" Style="{StaticResource GlassCard}" Padding="12,10">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="MicIconBg" Background="#0AFFFFFF" CornerRadius="4" Padding="6,5">
+                            <FontIcon x:Name="MicIcon" Glyph="&#xE720;" FontSize="13" Foreground="#AAFFFFFF"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="MICROPHONE" FontSize="10" FontWeight="Bold" Foreground="#AAFFFFFF"
+                                       CharacterSpacing="80" FontFamily="Cascadia Code, Consolas"/>
+                            <TextBlock x:Name="MicStatusText" Text="Active" FontSize="12" Foreground="#EEFFFFFF"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="2" x:Name="MicMuteToggle" Toggled="OnMicMuteToggled"
+                                      OnContent="" OffContent="" MinWidth="0" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- ═══ OUTPUT ═══ -->
+                <Border Style="{StaticResource GlassCard}" Padding="12,10">
+                    <Grid RowSpacing="8">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="OUTPUT" FontSize="10" FontWeight="Bold" Foreground="#AAFFFFFF"
+                                           CharacterSpacing="80" VerticalAlignment="Center"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                                <TextBlock x:Name="DeviceCount" Text="" FontSize="9" Foreground="#88FFFFFF"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Button Click="OnSettingsClick" HorizontalAlignment="Right"
+                                    Style="{StaticResource IconBtn}" Width="Auto" Height="20" Padding="6,0">
+                                <TextBlock Text="MANAGE" FontSize="8" FontWeight="Bold"
+                                           Foreground="#88FFFFFF" CharacterSpacing="50"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </Button>
+                        </Grid>
+                        <ListView Grid.Row="1" x:Name="DeviceList" SelectionMode="Single"
+                                  SelectionChanged="OnDeviceSelectionChanged" MaxHeight="80" Padding="0"/>
+                    </Grid>
+                </Border>
+
+                <!-- Settings button -->
+                <Button x:Name="SettingsButton" Click="OnSettingsClick"
+                        HorizontalAlignment="Stretch" Height="32" CornerRadius="4"
+                        Background="#0D1117" BorderThickness="1" BorderBrush="#1C2340"
+                        ToolTipService.ToolTip="Settings">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <FontIcon x:Name="SettingsIcon" Glyph="&#xE713;" FontSize="12" Foreground="#9900CFFF"/>
+                        <TextBlock Text="SETTINGS" FontSize="10" FontWeight="Bold"
+                                   Foreground="#8800CFFF" CharacterSpacing="120"
+                                   VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Kept invisible so code-behind references compile -->
+                <TextBlock x:Name="StatusBar" Visibility="Collapsed"/>
+                <TextBlock x:Name="ForegroundText" Visibility="Collapsed"/>
+                <Button x:Name="RefreshButton" Click="OnRefreshClick" Visibility="Collapsed"/>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ═══ SETTINGS VIEW (hidden by default) ═══ -->
+        <ScrollViewer x:Name="SettingsPanel" Grid.Row="1" Padding="12,8,12,12" Visibility="Collapsed">
+            <StackPanel Spacing="7" MaxWidth="560">
+
+                <!-- Back button -->
+                <Button Click="OnSettingsClick" HorizontalAlignment="Stretch" Height="32" CornerRadius="4"
+                        Background="#0D1117" BorderThickness="1" BorderBrush="#1C2340">
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <FontIcon Glyph="&#xE76B;" FontSize="11" Foreground="#9900CFFF"/>
+                        <TextBlock Text="BACK TO HOME" FontSize="10" FontWeight="Bold"
+                                   Foreground="#8800CFFF" CharacterSpacing="120"
+                                   VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- ═══ AUTO-DUCKING ═══ -->
+                <Border Style="{StaticResource SectionCard}">
+                    <StackPanel Spacing="12">
+                        <!-- Section header -->
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Width="3" Height="14" Background="#8000CFFF" CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="AUTO-DUCKING" FontSize="11" FontWeight="Bold"
+                                       Foreground="#DD00CFFF" CharacterSpacing="150"
+                                       VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Reduce game volume when chat is active"
+                                       FontSize="11" Foreground="#BBFFFFFF" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <ToggleSwitch Grid.Column="1" x:Name="SettDuckToggle" OnContent="" OffContent="" MinWidth="0"
+                                          Toggled="OnSettingsControlChanged"/>
+                        </Grid>
+                        <StackPanel Spacing="5">
+                            <Grid>
+                                <TextBlock Text="Volume reduction" FontSize="10" Foreground="#CCFFFFFF"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                                <TextBlock x:Name="SettDuckPercentLabel" Text="" FontSize="10"
+                                           Foreground="#CC00CFFF" HorizontalAlignment="Right"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </Grid>
+                            <Grid Height="26">
+                                <Grid Height="5" CornerRadius="3" VerticalAlignment="Center">
+                                    <Border Background="#1200CFFF" CornerRadius="3"/>
+                                    <Border x:Name="SettDuckPercentFill" Background="#55FFFFFF"
+                                            CornerRadius="3" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Slider x:Name="SettDuckPercentSlider"
+                                        StepFrequency="5" ValueChanged="OnSettDuckPercentChanged"
+                                        Opacity="0" IsThumbToolTipEnabled="False"
+                                        VerticalAlignment="Center" Margin="-4,0"/>
+                                <Border x:Name="SettDuckPercentThumb" Width="3" Height="20" CornerRadius="2"
+                                        Background="#DDFFFFFF" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Spacing="5">
+                            <Grid>
+                                <TextBlock Text="Activation threshold" FontSize="10" Foreground="#CCFFFFFF"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                                <TextBlock x:Name="SettDuckThresholdLabel" Text="" FontSize="10"
+                                           Foreground="#CC00CFFF" HorizontalAlignment="Right"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </Grid>
+                            <Grid Height="26">
+                                <Grid Height="5" CornerRadius="3" VerticalAlignment="Center">
+                                    <Border Background="#1200CFFF" CornerRadius="3"/>
+                                    <Border x:Name="SettDuckThresholdFill" Background="#55FFFFFF"
+                                            CornerRadius="3" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Slider x:Name="SettDuckThresholdSlider"
+                                        StepFrequency="0.005" ValueChanged="OnSettDuckThresholdChanged"
+                                        Opacity="0" IsThumbToolTipEnabled="False"
+                                        VerticalAlignment="Center" Margin="-4,0"/>
+                                <Border x:Name="SettDuckThresholdThumb" Width="3" Height="20" CornerRadius="2"
+                                        Background="#DDFFFFFF" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Spacing="5">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="Attack fade duration" FontSize="10" Foreground="#CCFFFFFF"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                    <TextBlock Text="(when speech starts)" FontSize="9" Foreground="#88FFFFFF" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock x:Name="SettFadeInLabel" Text="" FontSize="10"
+                                           Foreground="#CC00CFFF" HorizontalAlignment="Right"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </Grid>
+                            <Grid Height="26">
+                                <Grid Height="5" CornerRadius="3" VerticalAlignment="Center">
+                                    <Border Background="#1200CFFF" CornerRadius="3"/>
+                                    <Border x:Name="SettFadeInFill" Background="#55FFFFFF"
+                                            CornerRadius="3" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Slider x:Name="SettFadeInSlider"
+                                        StepFrequency="0.01" ValueChanged="OnSettFadeInChanged"
+                                        Opacity="0" IsThumbToolTipEnabled="False"
+                                        VerticalAlignment="Center" Margin="-4,0"/>
+                                <Border x:Name="SettFadeInThumb" Width="3" Height="20" CornerRadius="2"
+                                        Background="#DDFFFFFF" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <StackPanel Spacing="5">
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <TextBlock Text="Release fade duration" FontSize="10" Foreground="#CCFFFFFF"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                    <TextBlock Text="(after speech ends)" FontSize="9" Foreground="#88FFFFFF" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <TextBlock x:Name="SettAttackLabel" Text="" FontSize="10"
+                                           Foreground="#CC00CFFF" HorizontalAlignment="Right"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </Grid>
+                            <Grid Height="26">
+                                <Grid Height="5" CornerRadius="3" VerticalAlignment="Center">
+                                    <Border Background="#1200CFFF" CornerRadius="3"/>
+                                    <Border x:Name="SettAttackFill" Background="#55FFFFFF"
+                                            CornerRadius="3" HorizontalAlignment="Left"/>
+                                </Grid>
+                                <Slider x:Name="SettAttackSlider"
+                                        StepFrequency="0.01" ValueChanged="OnSettAttackChanged"
+                                        Opacity="0" IsThumbToolTipEnabled="False"
+                                        VerticalAlignment="Center" Margin="-4,0"/>
+                                <Border x:Name="SettAttackThumb" Width="3" Height="20" CornerRadius="2"
+                                        Background="#DDFFFFFF" HorizontalAlignment="Left"
+                                        VerticalAlignment="Center" IsHitTestVisible="False"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Live ducking monitor -->
+                        <Border Background="#06000010" CornerRadius="4" Padding="12,10"
+                                BorderThickness="1" BorderBrush="#1200CFFF">
+                            <StackPanel Spacing="8">
+                                <Grid>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Border Width="4" Height="4" CornerRadius="2" Background="#5000CFFF"
+                                                VerticalAlignment="Center"/>
+                                        <TextBlock Text="MONITOR" FontSize="9" FontWeight="Bold"
+                                                   Foreground="#BB00CFFF" CharacterSpacing="150"
+                                                   FontFamily="Cascadia Code, Consolas"/>
+                                    </StackPanel>
+                                    <Border x:Name="DuckStateBadge" Background="#0AFFFFFF" CornerRadius="3"
+                                            Padding="8,2" HorizontalAlignment="Right">
+                                        <TextBlock x:Name="DuckStateText" Text="IDLE" FontSize="8"
+                                                   FontWeight="Bold" Foreground="#DDFFFFFF"
+                                                   CharacterSpacing="80" FontFamily="Cascadia Code, Consolas"/>
+                                    </Border>
+                                </Grid>
+
+                                <StackPanel Spacing="3">
+                                    <TextBlock Text="Chat Peak" FontSize="9" Foreground="#AAB44FFF"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                    <Grid x:Name="ChatPeakTrack" Height="14" CornerRadius="2">
+                                        <Border Background="#0AB44FFF" CornerRadius="2"/>
+                                        <Border x:Name="ChatPeakBar" Background="#40B44FFF"
+                                                CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                                        <Border x:Name="ThresholdMarker" Width="1" Height="14"
+                                                Background="#9000CFFF" HorizontalAlignment="Left"
+                                                VerticalAlignment="Center"/>
+                                    </Grid>
+                                    <Grid>
+                                        <TextBlock x:Name="ChatPeakValue" Text="0.000" FontSize="8"
+                                                   Foreground="#9900CFFF" FontFamily="Cascadia Code, Consolas"/>
+                                        <TextBlock x:Name="ThresholdValue" Text="" FontSize="8"
+                                                   Foreground="#9900CFFF" HorizontalAlignment="Right"
+                                                   FontFamily="Cascadia Code, Consolas"/>
+                                    </Grid>
+                                </StackPanel>
+
+                                <StackPanel Spacing="3">
+                                    <TextBlock Text="Game Volume" FontSize="9" Foreground="#AA00CFFF"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                    <Grid x:Name="GameVolTrack" Height="8" CornerRadius="2">
+                                        <Border Background="#0A00CFFF" CornerRadius="2"/>
+                                        <Border x:Name="GameVolBar" Background="#3500CFFF"
+                                                CornerRadius="2" HorizontalAlignment="Left" Width="0"/>
+                                    </Grid>
+                                    <TextBlock x:Name="GameVolValue" Text="100%" FontSize="8"
+                                               Foreground="#9900CFFF" FontFamily="Cascadia Code, Consolas"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ PREFERRED DEVICES ═══ -->
+                <Border Style="{StaticResource SectionCard}">
+                    <StackPanel Spacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Width="3" Height="14" Background="#8000CFFF" CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="PREFERRED DEVICES" FontSize="11" FontWeight="Bold"
+                                       Foreground="#DD00CFFF" CharacterSpacing="150"
+                                       VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                        </StackPanel>
+                        <TextBlock Text="Select devices to cycle through with the hotkey."
+                                   FontSize="11" Foreground="#BBFFFFFF" TextWrapping="Wrap"/>
+                        <ListView x:Name="SettDeviceList" SelectionMode="Multiple" Padding="0"
+                                  SelectionChanged="OnSettDeviceSelectionChanged">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding FriendlyName}" FontSize="11"
+                                               Foreground="#DDFFFFFF" FontFamily="Cascadia Code, Consolas"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </StackPanel>
+                </Border>
+
+                <!-- ═══ AUTO-START ═══ -->
+                <Border Style="{StaticResource SectionCard}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="3" Height="14" Background="#8000CFFF" CornerRadius="2"
+                                VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="START WITH WINDOWS" FontSize="11" FontWeight="Bold"
+                                       Foreground="#DD00CFFF" CharacterSpacing="150"
+                                       FontFamily="Cascadia Code, Consolas"/>
+                            <TextBlock Text="Launch automatically at login" FontSize="11" Foreground="#BBFFFFFF"/>
+                        </StackPanel>
+                        <ToggleSwitch Grid.Column="2" x:Name="SettAutoStartToggle"
+                                      OnContent="" OffContent="" MinWidth="0"
+                                      Toggled="OnSettingsControlChanged"/>
+                    </Grid>
+                </Border>
+
+
+                <!-- ═══ HOTKEYS ═══ -->
+                <Border Style="{StaticResource SectionCard}">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Border Width="3" Height="14" Background="#8000CFFF" CornerRadius="2"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Text="GLOBAL HOTKEYS" FontSize="11" FontWeight="Bold"
+                                       Foreground="#DD00CFFF" CharacterSpacing="150"
+                                       VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                        </StackPanel>
+                        <TextBlock Text="Click a combination to change it, then press the new keys. Esc to cancel."
+                                   FontSize="11" Foreground="#BBFFFFFF" TextWrapping="Wrap"/>
+                        <StackPanel x:Name="SettHotkeyPanel" Spacing="4"/>
+                        <Button Content="Reset to defaults" Click="OnResetHotkeysClick"
+                                FontSize="10" Padding="14,5" CornerRadius="4"
+                                Background="#0AFFFFFF" BorderThickness="1" BorderBrush="#15FFFFFF"
+                                Foreground="#AAFFFFFF"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="GameAudioMixer.Views.HudWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="">
+
+    <Grid RequestedTheme="Dark" Background="Transparent">
+
+        <!-- Semi-transparent dark card with left accent line -->
+        <Border x:Name="CardBorder" CornerRadius="10"
+                Background="#C0090D18"
+                BorderBrush="#3500CFFF" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left accent bar -->
+                <Border x:Name="AccentBar" Grid.Column="0"
+                        Background="#CC00CFFF" CornerRadius="10,0,0,10"/>
+
+                <!-- Content -->
+                <StackPanel Grid.Column="1" Spacing="5" Padding="12,10,14,10">
+
+                    <!-- Header row: icon + label + optional subtitle -->
+                    <StackPanel Orientation="Horizontal" Spacing="7">
+                        <FontIcon x:Name="ActionIcon" Glyph="&#xE9E9;" FontSize="12"
+                                  Foreground="#CC00CFFF" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="ActionTitle" Text="MIX" FontSize="9" FontWeight="Bold"
+                                   Foreground="#AAFFFFFF" CharacterSpacing="200"
+                                   VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+                        <TextBlock x:Name="ActionSubtitle" Text="" FontSize="9" Foreground="#55FFFFFF"
+                                   VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="120"/>
+                    </StackPanel>
+
+                    <!-- ── MIX BALANCE PANEL (mirrors main window) ── -->
+                    <StackPanel x:Name="BalancePanel" Visibility="Collapsed" Spacing="5">
+
+                        <!-- Large volume numbers: GAME left | MIX center | CHAT right -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- GAME side -->
+                            <StackPanel Grid.Column="0" Spacing="1">
+                                <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="GamePercent" Text="100" FontSize="24" FontWeight="Bold"
+                                               Foreground="#CC00CFFF" FontFamily="Cascadia Code, Consolas"/>
+                                    <TextBlock Text="%" FontSize="10" Foreground="#AA00CFFF"
+                                               VerticalAlignment="Bottom" Margin="1,0,0,3"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                </StackPanel>
+                                <TextBlock Text="GAME" FontSize="8" FontWeight="Bold"
+                                           Foreground="#6600CFFF" CharacterSpacing="150"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+
+                            <!-- MIX center label -->
+                            <TextBlock Grid.Column="1" Text="MIX" FontSize="8" FontWeight="Bold"
+                                       Foreground="#44FFFFFF" CharacterSpacing="200"
+                                       VerticalAlignment="Center" FontFamily="Cascadia Code, Consolas"/>
+
+                            <!-- CHAT side -->
+                            <StackPanel Grid.Column="2" Spacing="1" HorizontalAlignment="Right">
+                                <StackPanel Orientation="Horizontal" Spacing="1"
+                                            HorizontalAlignment="Right" VerticalAlignment="Center">
+                                    <TextBlock x:Name="ChatPercent" Text="100" FontSize="24" FontWeight="Bold"
+                                               Foreground="#CCB44FFF" FontFamily="Cascadia Code, Consolas"/>
+                                    <TextBlock Text="%" FontSize="10" Foreground="#AAB44FFF"
+                                               VerticalAlignment="Bottom" Margin="1,0,0,3"
+                                               FontFamily="Cascadia Code, Consolas"/>
+                                </StackPanel>
+                                <TextBlock Text="CHAT" FontSize="8" FontWeight="Bold"
+                                           Foreground="#66B44FFF" CharacterSpacing="150"
+                                           HorizontalAlignment="Right"
+                                           FontFamily="Cascadia Code, Consolas"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Track + moving thumb -->
+                        <Grid Height="20">
+
+                            <!-- Colored track segments (dim) -->
+                            <Grid Height="4" CornerRadius="2" VerticalAlignment="Center">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="GameTrackCol" Width="*"/>
+                                    <ColumnDefinition x:Name="ChatTrackCol" Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Background="#2200CFFF" CornerRadius="2,0,0,2"/>
+                                <Border Grid.Column="1" Background="#22B44FFF" CornerRadius="0,2,2,0"/>
+                            </Grid>
+
+                            <!-- Center tick -->
+                            <Border Width="1" Height="10" CornerRadius="1"
+                                    Background="#28FFFFFF" HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" IsHitTestVisible="False"/>
+
+                            <!-- Thumb positioned via 3-column star grid -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition x:Name="ThumbLeft" Width="*"/>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition x:Name="ThumbRight" Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="BalanceThumb" Grid.Column="1"
+                                        Height="18" CornerRadius="2"
+                                        Background="#D0FFFFFF" VerticalAlignment="Center"/>
+                            </Grid>
+
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- ── SINGLE-LINE STATUS (mic / mute / device / preset) ── -->
+                    <TextBlock x:Name="LargeStatus" Text="" FontSize="18" FontWeight="Bold"
+                               Visibility="Collapsed" FontFamily="Cascadia Code, Consolas"
+                               TextWrapping="Wrap"/>
+
+                </StackPanel>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

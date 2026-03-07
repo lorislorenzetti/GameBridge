@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Application
+    x:Class="GameAudioMixer.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- bg=#0A0E1A (dark navy)  card=#111828  border=#1C2340 -->
+            <Style x:Key="GlassCard" TargetType="Border">
+                <Setter Property="Background" Value="#111828"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="BorderBrush" Value="#1C2340"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+
+            <Style x:Key="SectionCard" TargetType="Border">
+                <Setter Property="Background" Value="#111828"/>
+                <Setter Property="CornerRadius" Value="6"/>
+                <Setter Property="BorderBrush" Value="#1C2340"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="18,14"/>
+            </Style>
+
+            <Style x:Key="PillButton" TargetType="Button">
+                <Setter Property="Height" Value="28"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Padding" Value="14,0"/>
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+
+            <Style x:Key="IconBtn" TargetType="Button">
+                <Setter Property="Width" Value="32"/>
+                <Setter Property="Height" Value="32"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="CornerRadius" Value="4"/>
+            </Style>
+
+            <Style x:Key="NeonBtn" TargetType="Button">
+                <Setter Property="Height" Value="30"/>
+                <Setter Property="CornerRadius" Value="4"/>
+                <Setter Property="FontSize" Value="10"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="0"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

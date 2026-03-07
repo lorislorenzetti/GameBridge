@@ -1,0 +1,26 @@
+# Build output
+bin/
+obj/
+installer/Output/
+publish/
+publish_sc/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+packages/
+.nuget/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Cursor / editor
+.cursor/

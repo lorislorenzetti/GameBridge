@@ -1,0 +1,10 @@
+<Project>
+  <!-- Point AppxMSBuildToolsPath to the VS Build Tools installation if available,
+       otherwise create a fallback to prevent MSB4062 errors when building without
+       full Visual Studio. Requires VS 2022 Build Tools with UWP workload for
+       full PRI tooling support. -->
+  <PropertyGroup>
+    <_VSBuildToolsAppxPath>C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Microsoft\VisualStudio\v17.0\AppxPackage\</_VSBuildToolsAppxPath>
+    <AppxMSBuildToolsPath Condition="Exists('$(_VSBuildToolsAppxPath)')">$(_VSBuildToolsAppxPath)</AppxMSBuildToolsPath>
+  </PropertyGroup>
+</Project>

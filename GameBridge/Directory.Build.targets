@@ -1,0 +1,94 @@
+<Project>
+  <!--
+    Override MrtCore.PriGen targets that depend on VS-only DLLs.
+    These stubs let WinUI 3 build from CLI without Visual Studio.
+  -->
+  <Target Name="GetMrtPackagingOutputs" />
+  <Target Name="GetOptionalProjectOutputs" Returns="" />
+  <Target Name="CopyLocalFilesOutputGroup"
+          DependsOnTargets="$(CopyLocalFilesOutputGroupDependsOn)"
+          Returns="@(CopyLocalFilesOutputGroupOutput)">
+    <ItemGroup>
+      <CopyLocalFilesOutputGroupOutput Include="@(ReferenceCopyLocalPaths)"
+        Condition="'%(ReferenceCopyLocalPaths.Extension)' != '.xml'">
+        <TargetPath>%(ReferenceCopyLocalPaths.DestinationSubDirectory)%(ReferenceCopyLocalPaths.Filename)%(ReferenceCopyLocalPaths.Extension)</TargetPath>
+      </CopyLocalFilesOutputGroupOutput>
+    </ItemGroup>
+  </Target>
+  <Target Name="_GetSdkToolsPathsFromSdk" />
+  <Target Name="_GetSdkToolsPathsFromPackage" />
+  <Target Name="_GetPackageArchitecture" />
+  <Target Name="_GetDefaultResourceLanguage" />
+  <Target Name="_ExpandProjectPriFile" />
+  <Target Name="_ExpandPriFiles" />
+  <Target Name="AddPriPayloadFilesToCopyToOutputDirectoryItems" />
+  <Target Name="_ValidateConfiguration" />
+  <Target Name="_GenerateProjectPriFile" />
+  <Target Name="_GeneratePrisForPortableLibraries" />
+  <Target Name="_GenerateProjectPriConfigurationFiles" />
+  <Target Name="_GenerateProjectPriFileCore" />
+
+  <!--
+    Copy XBF/XAML from obj to output dir and generate resources.pri.
+    Uses a clean staging directory to avoid duplicate-resource errors from
+    framework PRI files that coexist in the output directory.
+  -->
+  <Target Name="DeployXamlAndPriAfterPublish" AfterTargets="Publish">
+    <PropertyGroup>
+      <_MakePriExe>C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\makepri.exe</_MakePriExe>
+      <_PriStaging>$(PublishDir)_pri_source\</_PriStaging>
+    </PropertyGroup>
+    <ItemGroup>
+      <_ObjXbf  Include="$(IntermediateOutputPath)**\*.xbf" />
+      <_ObjXaml Include="$(IntermediateOutputPath)**\*.xaml" Exclude="$(IntermediateOutputPath)MsixContent\**" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_ObjXbf)"  DestinationFiles="@(_ObjXbf->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"  SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ObjXaml)" DestinationFiles="@(_ObjXaml->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <MakeDir Directories="$(_PriStaging)" />
+    <Copy SourceFiles="@(_ObjXbf)"  DestinationFiles="@(_ObjXbf->'$(_PriStaging)%(RecursiveDir)%(Filename)%(Extension)')"  SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ObjXaml)" DestinationFiles="@(_ObjXaml->'$(_PriStaging)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(PublishDir)Microsoft.UI.Xaml.Controls.pri" DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(PublishDir)Microsoft.UI.Xaml.Controls.pri')" />
+    <Copy SourceFiles="$(PublishDir)Microsoft.UI.pri"               DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(PublishDir)Microsoft.UI.pri')" />
+    <Copy SourceFiles="$(PublishDir)Microsoft.WindowsAppRuntime.pri" DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(PublishDir)Microsoft.WindowsAppRuntime.pri')" />
+    <Exec Command="&quot;$(_MakePriExe)&quot; createconfig /cf &quot;$(_PriStaging)priconfig.xml&quot; /dq lang-en-US /o"
+          Condition="Exists('$(_MakePriExe)') AND !Exists('$(_PriStaging)priconfig.xml')" />
+    <Exec Command="&quot;$(_MakePriExe)&quot; new /pr &quot;$(_PriStaging).&quot; /cf &quot;$(_PriStaging)priconfig.xml&quot; /of &quot;$(PublishDir)resources.pri&quot; /o"
+          Condition="Exists('$(_MakePriExe)')"
+          IgnoreExitCode="true" />
+  </Target>
+
+  <Target Name="DeployXamlAndPri" AfterTargets="Build">
+    <PropertyGroup>
+      <_MakePriExe>C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64\makepri.exe</_MakePriExe>
+      <_PriStaging>$(OutputPath)_pri_source\</_PriStaging>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_ObjXbf Include="$(IntermediateOutputPath)**\*.xbf" />
+      <_ObjXaml Include="$(IntermediateOutputPath)**\*.xaml" Exclude="$(IntermediateOutputPath)MsixContent\**" />
+    </ItemGroup>
+
+    <!-- Copy to output directory -->
+    <Copy SourceFiles="@(_ObjXbf)" DestinationFiles="@(_ObjXbf->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ObjXaml)" DestinationFiles="@(_ObjXaml->'$(OutputPath)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+
+    <!-- Copy to clean staging directory for PRI generation -->
+    <MakeDir Directories="$(_PriStaging)" />
+    <Copy SourceFiles="@(_ObjXbf)" DestinationFiles="@(_ObjXbf->'$(_PriStaging)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(_ObjXaml)" DestinationFiles="@(_ObjXaml->'$(_PriStaging)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+
+    <!-- Copy framework PRIs to staging (needed for theme resources merge) -->
+    <Copy SourceFiles="$(OutputPath)Microsoft.UI.Xaml.Controls.pri" DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Microsoft.UI.Xaml.Controls.pri')" />
+    <Copy SourceFiles="$(OutputPath)Microsoft.UI.pri" DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Microsoft.UI.pri')" />
+    <Copy SourceFiles="$(OutputPath)Microsoft.WindowsAppRuntime.pri" DestinationFolder="$(_PriStaging)" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)Microsoft.WindowsAppRuntime.pri')" />
+
+    <!-- Generate priconfig (once) -->
+    <Exec Command="&quot;$(_MakePriExe)&quot; createconfig /cf &quot;$(_PriStaging)priconfig.xml&quot; /dq lang-en-US /o"
+          Condition="Exists('$(_MakePriExe)') AND !Exists('$(_PriStaging)priconfig.xml')" />
+
+    <!-- Generate resources.pri from staging (framework PRIs merged via PRI indexer) -->
+    <Exec Command="&quot;$(_MakePriExe)&quot; new /pr &quot;$(_PriStaging).&quot; /cf &quot;$(_PriStaging)priconfig.xml&quot; /of &quot;$(OutputPath)resources.pri&quot; /o"
+          Condition="Exists('$(_MakePriExe)')"
+          IgnoreExitCode="true" />
+  </Target>
+</Project>
